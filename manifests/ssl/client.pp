@@ -35,7 +35,7 @@ define kafka::ssl::client (
 
   Exec {
     path => '/bin:/sbin:/usr/bin:/usr/sbin',
-    cwd  => $ssl_dir,
+    cwd  => "$ssl_dir/clients/",
   }
 
   # Currently there is no way to revoke a certificate which is pretty silly.
@@ -99,5 +99,16 @@ define kafka::ssl::client (
   }
 
 
+  # Create distribution archive of all the certs for a given client.
+  exec { "client_dist_archive_${client_name}":
+    command     => "tar --transform 's,^,kafka-creds-${client_name}/,' -cjf ${ssl_dir}/dist/kafka-creds-${client_name}.tar.bz2 ${client_name}.* ../ca.cert",
+    creates     => "${ssl_dir}/dist/kafka-creds-${client_name}.tar.bz2",
+    require     => [
+      # Make sure we've finished generating everything.
+      Exec["client_keystore_export_key_pem_${client_name}"],
+      Exec["client_keystore_export_pkcs12_${client_name}"],
+      Exec["client_keystore_import_signed_cert_${client_name}"],
+    ]
+  }
 
 }

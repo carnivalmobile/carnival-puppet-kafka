@@ -81,6 +81,11 @@ class kafka::ssl::broker (
     mode    => '0700',
   } ->
 
+  file { "${ssl_dir}/dist":
+    ensure  => 'directory',
+    mode    => '0700',
+  } ->
+
   # Install the CA cert
   file { "${ssl_dir}/ca.cert":
     ensure  => 'file',
