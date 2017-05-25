@@ -69,18 +69,18 @@ define kafka::ssl::client (
   # If a new client keystore is created, import the CA cert into it.
   exec { "client_keystore_import_ca_cert_${client_name}":
     command     => "keytool -keystore ${ssl_dir}/clients/${client_name}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.cert -noprompt",
-    subscribe   => Exec["client_keystore"],
+    subscribe   => Exec["client_keystore_${client_name}"],
     refreshonly => true,
   }
 
   # Once the client cert has been signed, import the signed cert into the Java keystore.
   exec { "client_keystore_import_signed_cert_${client_name}":
     command     => "keytool -keystore ${ssl_dir}/clients/${client_name}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias localhost -import -file ${ssl_dir}/clients/${client_name}.signed.crt -noprompt",
-    subscribe   => Exec['client_keystore_sign_cert'],
+    subscribe   => Exec["client_keystore_sign_cert_${client_name}"],
     refreshonly => true,
 
     # Import fails if we haven't already imported the CA cert.
-    require     => Exec['client_keystore_import_ca_cert'],
+    require     => Exec["client_keystore_import_ca_cert_${client_name}"],
   }
 
   # TODO: Export out in p12 and PEM formats to make it easier to use with
