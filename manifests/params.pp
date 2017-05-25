@@ -13,6 +13,7 @@ class kafka::params {
   $install_dir    = "/opt/kafka-${scala_version}-${version}"
   $config_dir     = '/opt/kafka/config'
   $log_dir        = '/var/log/kafka'
+  $ssl_dir        = '/etc/pki/kafka'
   $mirror_url     = 'http://mirrors.ukfast.co.uk/sites/ftp.apache.org'
   $install_java   = true
   $package_dir    = '/var/tmp/kafka'
@@ -24,6 +25,9 @@ class kafka::params {
   $group          = 'kafka'
 
   $service_requires_zookeeper = true
+
+  $ssl_keystore_password = 'password'
+  $ssl_validity_days     = '7300' # 20 years
 
   $broker_service_install = true
   $broker_service_ensure = 'running'
