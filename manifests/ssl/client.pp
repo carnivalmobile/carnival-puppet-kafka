@@ -83,8 +83,21 @@ define kafka::ssl::client (
     require     => Exec["client_keystore_import_ca_cert_${client_name}"],
   }
 
-  # TODO: Export out in p12 and PEM formats to make it easier to use with
-  # other apps.
+
+  # Get PKCS12 (.pk12) version of the keystore (cert + key)
+  exec { "client_keystore_export_pkcs12_${client_name}":
+    command     => "keytool -importkeystore -srckeystore ${ssl_dir}/clients/${client_name}.keystore.jks -srcstorepass ${ssl_keystore_password} -srckeypass ${ssl_keystore_password} -destkeystore ${ssl_dir}/clients/${client_name}.p12 -deststoretype PKCS12 -srcalias localhost -deststorepass ${ssl_keystore_password} -destkeypass ${ssl_keystore_password}",
+    creates     => "${ssl_dir}/clients/${client_name}.p12",
+    require     => Exec["client_keystore_import_signed_cert_${client_name}"],
+  }
+
+  # Get the PEM version of the client key (we pull this from the pkcs12 file)
+  exec { "client_keystore_export_key_pem_${client_name}":
+    command     => "openssl pkcs12 -in ${ssl_dir}/clients/${client_name}.p12 -nodes -nocerts -password \"pass:${ssl_keystore_password}\" -out ${ssl_dir}/clients/${client_name}.key",
+    creates     => "${ssl_dir}/clients/${client_name}.key",
+    require     => Exec["client_keystore_export_pkcs12_${client_name}"],
+  }
+
 
 
 }
