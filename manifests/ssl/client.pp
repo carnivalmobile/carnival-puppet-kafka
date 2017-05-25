@@ -42,7 +42,7 @@ define kafka::ssl::client (
   # Let's at least make it clear to the admin that this is a problem... longer
   # term solution is probably to blacklist disabled clients by creating a deny
   # all ACL for the user.
-  if ($ensure != 'absent') {
+  if ($ensure == 'absent') {
     notify { "Unable to remove client ${client_name} - Kafka does not support Certicate Revocation Lists (CRLS). To revoke, roll a new CA cert and key and regenerate all clients.": }
   }
 
