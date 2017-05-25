@@ -61,14 +61,14 @@ define kafka::ssl::client (
   } ->
 
   exec { "client_keystore_sign_cert_${client_name}":
-    command => "openssl x509 -req -CA ${ssl_dir}/ca.cert  -CAkey ${ssl_dir}/ca.key -in ${ssl_dir}/clients/${client_name}.csr -out ${ssl_dir}/clients/${client_name}.crt -days ${ssl_validity_days} -CAcreateserial",
+    command => "openssl x509 -req -CA ${ssl_dir}/ca.crt  -CAkey ${ssl_dir}/ca.key -in ${ssl_dir}/clients/${client_name}.csr -out ${ssl_dir}/clients/${client_name}.crt -days ${ssl_validity_days} -CAcreateserial",
     creates => "${ssl_dir}/clients/${client_name}.crt",
   }
 
 
   # If a new client keystore is created, import the CA cert into it.
   exec { "client_keystore_import_ca_cert_${client_name}":
-    command     => "keytool -keystore ${ssl_dir}/clients/${client_name}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.cert -noprompt",
+    command     => "keytool -keystore ${ssl_dir}/clients/${client_name}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.crt -noprompt",
     subscribe   => Exec["client_keystore_${client_name}"],
     refreshonly => true,
   }
@@ -101,7 +101,7 @@ define kafka::ssl::client (
 
   # Create distribution archive of all the certs for a given client.
   exec { "client_dist_archive_${client_name}":
-    command     => "tar --transform 's,^,kafka-creds-${client_name}/,' -cjf ${ssl_dir}/dist/kafka-creds-${client_name}.tar.bz2 ${client_name}.* ../ca.cert",
+    command     => "tar --transform 's,^,kafka-creds-${client_name}/,' -cjf ${ssl_dir}/dist/kafka-creds-${client_name}.tar.bz2 ${client_name}.* ../ca.crt",
     creates     => "${ssl_dir}/dist/kafka-creds-${client_name}.tar.bz2",
     require     => [
       # Make sure we've finished generating everything.

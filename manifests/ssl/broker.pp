@@ -10,7 +10,7 @@
 #  -nodes \
 #  -x509 \
 #  -keyout ${ssl_dir}/ca.key \
-#  -out ${ssl_dir}/ca.cert  \
+#  -out ${ssl_dir}/ca.crt  \
 #  -days ${ssl_validity_days} \
 #  -subj "/C=US/ST=Kafka/L=Kafka/O=Kafka/OU=Kafka/CN=kafka.internal"
 #
@@ -87,7 +87,7 @@ class kafka::ssl::broker (
   } ->
 
   # Install the CA cert
-  file { "${ssl_dir}/ca.cert":
+  file { "${ssl_dir}/ca.crt":
     ensure  => 'file',
     mode    => '0600',
     content => $ca_cert,
@@ -101,7 +101,7 @@ class kafka::ssl::broker (
 
   # Generate a Java keystore "truststore" with the CA cert we have in PEM format.
   exec { "ca_truststore":
-    command => "keytool -keystore ${ssl_dir}/ca.truststore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.cert -noprompt",
+    command => "keytool -keystore ${ssl_dir}/ca.truststore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.crt -noprompt",
     creates => "${ssl_dir}/ca.truststore.jks",
   } ->
 
@@ -119,14 +119,14 @@ class kafka::ssl::broker (
   } ->
 
   exec { "server_keystore_sign_cert":
-    command => "openssl x509 -req -CA ${ssl_dir}/ca.cert  -CAkey ${ssl_dir}/ca.key -in ${ssl_dir}/${::hostname}.csr -out ${ssl_dir}/${::hostname}.signed.crt -days ${ssl_validity_days} -CAcreateserial",
+    command => "openssl x509 -req -CA ${ssl_dir}/ca.crt  -CAkey ${ssl_dir}/ca.key -in ${ssl_dir}/${::hostname}.csr -out ${ssl_dir}/${::hostname}.signed.crt -days ${ssl_validity_days} -CAcreateserial",
     creates => "${ssl_dir}/${::hostname}.signed.crt",
   }
 
 
   # If a new server keystore is created, import the CA cert into it.
   exec { "server_keystore_import_ca_cert":
-    command     => "keytool -keystore ${ssl_dir}/${::hostname}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.cert -noprompt",
+    command     => "keytool -keystore ${ssl_dir}/${::hostname}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias CARoot -import -file ${ssl_dir}/ca.crt -noprompt",
     subscribe   => Exec["server_keystore"],
     refreshonly => true,
   }
