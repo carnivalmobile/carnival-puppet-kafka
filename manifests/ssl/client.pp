@@ -6,6 +6,13 @@
 # issue, since we validate by the CA, not by the individual cert fingerprint,
 # but if it bothers you, you'd need to mount ${ssl_dir} as shared storage
 # amongst the cluster members.
+#
+# Note: To make SSL authentication actually work, make sure you add the
+# following param to Hiera:
+#
+#   kafka::broker::config:
+#     ssl.client.auth: required
+#
 
 define kafka::ssl::client (
   $ensure                 = 'present',

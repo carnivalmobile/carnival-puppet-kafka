@@ -36,6 +36,10 @@
 #   ssl.truststore.location: /etc/pki/kafka/ca.truststore.jks
 #   ssl.truststore.password: password
 #
+#   # Optional - If you want to do SSL client authentication and block any
+#   # clients that have not been signed by the CA.
+#   ssl.client.auth: required
+#
 #
 class kafka::ssl::broker (
   $ssl_dir                = $kafka::params::ssl_dir,
