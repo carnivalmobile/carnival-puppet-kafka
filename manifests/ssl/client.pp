@@ -61,8 +61,8 @@ define kafka::ssl::client (
   } ->
 
   exec { "client_keystore_sign_cert_${client_name}":
-    command => "openssl x509 -req -CA ${ssl_dir}/ca.cert  -CAkey ${ssl_dir}/ca.key -in ${ssl_dir}/clients/${client_name}.csr -out ${ssl_dir}/clients/${client_name}.signed.crt -days ${ssl_validity_days} -CAcreateserial",
-    creates => "${ssl_dir}/clients/${client_name}.signed.crt",
+    command => "openssl x509 -req -CA ${ssl_dir}/ca.cert  -CAkey ${ssl_dir}/ca.key -in ${ssl_dir}/clients/${client_name}.csr -out ${ssl_dir}/clients/${client_name}.crt -days ${ssl_validity_days} -CAcreateserial",
+    creates => "${ssl_dir}/clients/${client_name}.crt",
   }
 
 
@@ -75,7 +75,7 @@ define kafka::ssl::client (
 
   # Once the client cert has been signed, import the signed cert into the Java keystore.
   exec { "client_keystore_import_signed_cert_${client_name}":
-    command     => "keytool -keystore ${ssl_dir}/clients/${client_name}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias localhost -import -file ${ssl_dir}/clients/${client_name}.signed.crt -noprompt",
+    command     => "keytool -keystore ${ssl_dir}/clients/${client_name}.keystore.jks -storepass ${ssl_keystore_password} -keypass ${ssl_keystore_password} -alias localhost -import -file ${ssl_dir}/clients/${client_name}.crt -noprompt",
     subscribe   => Exec["client_keystore_sign_cert_${client_name}"],
     refreshonly => true,
 
