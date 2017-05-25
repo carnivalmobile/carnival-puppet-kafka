@@ -70,8 +70,13 @@ class kafka::ssl::broker (
   }
 
 
-  # Create the directory to store our certs
+  # Create the directories to store our certs
   file { $ssl_dir:
+    ensure  => 'directory',
+    mode    => '0700',
+  } ->
+
+  file { "${ssl_dir}/clients":
     ensure  => 'directory',
     mode    => '0700',
   } ->
