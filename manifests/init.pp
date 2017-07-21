@@ -104,6 +104,7 @@ class kafka (
   group { $group:
     ensure => present,
     gid    => $group_id,
+    system  => true,
   }
 
   user { $user:
@@ -111,6 +112,7 @@ class kafka (
     shell   => '/bin/bash',
     require => Group[$group],
     uid     => $user_id,
+    system  => true,
   }
 
   file { $package_dir:
