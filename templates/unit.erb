@@ -14,6 +14,7 @@ Group=kafka
 SyslogIdentifier=<%= @service_name %>
 <%- case @service_name 
   when 'kafka' -%>
+Environment='EXTRA_ARGS=-name kafkaServer'
 Environment='KAFKA_HEAP_OPTS=<%= @heap_opts %>'
 Environment='KAFKA_LOG4J_OPTS=<%= @log4j_opts %>'
 Environment='KAFKA_JMX_OPTS=<%= @jmx_opts %>'
